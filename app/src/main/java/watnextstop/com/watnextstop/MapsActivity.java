@@ -93,11 +93,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 16.0f));
 
                 //check if we're close to destination
-                float distance = getDistance(destination.getPosition(), currentLocation);
-                if (distance <= distAlert1) {
-                    sendDestinationAlert();
-                } else if (distance <= distAlert2) {
-                    sendApproachAlert();
+                float distance = 0;
+                if(destination_init) {
+                    distance = getDistance(destination.getPosition(), currentLocation);
+                    System.out.println("distance: " + distance);
+                    if (distance <= distAlert1) {
+                        sendDestinationAlert();
+                        System.out.println("send dest alert");
+                    } else if (distance <= distAlert2) {
+                        sendApproachAlert();
+                        System.out.println("send approach alert");
+                    }
                 }
             }
         }
@@ -145,8 +151,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     // time to destination
     public float getDistance(LatLng dest, LatLng cur) {
+
+        //no
+        /*
         Location destloc = new Location(LocationManager.GPS_PROVIDER);
         Location curloc = new Location(LocationManager.GPS_PROVIDER);
+
+        System.out.println(cur.latitude + ", " + cur.longitude);
+        System.out.println(dest.latitude + ", " + dest.longitude);
 
         destloc.setLatitude(dest.latitude);
         destloc.setLongitude(dest.longitude);
@@ -154,11 +166,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         curloc.setLatitude(cur.latitude);
         curloc.setLatitude(cur.longitude);
 
-        return curloc.distanceTo(destloc);
+        float distance = curloc.distanceTo(destloc);
+        System.out.println("distance1:" + distance);
+        */
+
+        return (float)distance(cur.latitude, cur.longitude, destination.getPosition().latitude, destination.getPosition().longitude);
     }
 
-    public static float distAlert1 = 100;
-    public static float distAlert2 = 200;
+    //http://stackoverflow.com/questions/6981916/how-to-calculate-distance-between-two-locations-using-their-longitude-and-latitu
+    private double distance(double lat1, double lon1, double lat2, double lon2) {
+        double theta = lon1 - lon2;
+        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515;
+        return (dist*1000); //km to m
+    }
+    private double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+    private double rad2deg(double rad) {
+        return (rad * 180.0 / Math.PI);
+    }
+
+
+    public static float distAlert1 = 100f;
+    public static float distAlert2 = 200f;
 
     public static final int ALERT_ID1 = 1;
     public static final int ALERT_ID2 = 2;
