@@ -1,5 +1,11 @@
 package watnextstop.com.watnextstop;
 
+import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.location.LocationManager;
 import android.os.StrictMode;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -17,6 +23,7 @@ import android.content.pm.ActivityInfo;
 import android.location.Location;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -84,6 +91,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
             if(mMap != null){
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 16.0f));
+
+                //check if we're close to destination
+                float distance = getDistance(destination.getPosition(), currentLocation);
+                if (distance <= distAlert1) {
+                    sendDestinationAlert();
+                } else if (distance <= distAlert2) {
+                    sendApproachAlert();
+                }
             }
         }
     };
@@ -96,12 +111,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //get the directions - open new activity, then go back
         System.out.println("Getting directions");
         System.out.println("# of transfers: ");
-        for(Transfer t : doDirections()){
-            System.out.println(t.toString());
+        ArrayList<Transfer> transfers = doDirections();
+        System.out.println(transfers.size() + " transfers");
+        String messagetoshow = "";
+        messagetoshow += "There are " + transfers.size() + " transfers \n";
+        for(Transfer t : transfers){
+            messagetoshow += t.stopNum + " stops - " + t.lastLoc + "\n";
         }
+        new AlertDialog.Builder(this)
+                .setTitle("Your Route")
+                .setMessage(messagetoshow)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
     public ArrayList<Transfer> doDirections(){
-
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         //this is the server key - not the android api key
@@ -114,9 +137,62 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             return LocationStuff.getTransfers(json);
         }
-        catch (Exception e) {System.out.println(e.getMessage());}
-        finally {
+        catch (Exception e) {
+            System.out.println(e.getMessage());
             return new ArrayList<Transfer>();
         }
     }
+
+    // time to destination
+    public float getDistance(LatLng dest, LatLng cur) {
+        Location destloc = new Location(LocationManager.GPS_PROVIDER);
+        Location curloc = new Location(LocationManager.GPS_PROVIDER);
+
+        destloc.setLatitude(dest.latitude);
+        destloc.setLongitude(dest.longitude);
+
+        curloc.setLatitude(cur.latitude);
+        curloc.setLatitude(cur.longitude);
+
+        return curloc.distanceTo(destloc);
+    }
+
+    public static float distAlert1 = 100;
+    public static float distAlert2 = 200;
+
+    public static final int ALERT_ID1 = 1;
+    public static final int ALERT_ID2 = 2;
+
+    public void sendDestinationAlert() {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setSmallIcon(R.drawable.cast_ic_notification_0);
+
+        Intent intent = new Intent(this, MapsActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+        builder.setContentIntent(pendingIntent);
+        builder.setContentTitle("Approaching destination!");
+        builder.setContentText("You are reaching your destination!");
+        builder.setVibrate(new long[]{1000, 1000, 1000, 1000, 1000});
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(ALERT_ID1, builder.build());
+    }
+
+    public void sendApproachAlert() {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setSmallIcon(R.drawable.cast_ic_notification_0);
+
+        Intent intent = new Intent(this, MapsActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+        builder.setContentIntent(pendingIntent);
+        builder.setContentTitle("Reaching soon...");
+        builder.setContentText("Almost there...");
+        builder.setVibrate(new long[]{2000, 2000, 2000, 2000, 2000});
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(ALERT_ID2, builder.build());
+    }
+
 }

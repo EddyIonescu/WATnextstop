@@ -102,6 +102,7 @@ public class LocationStuff {
     //updated version
     public static ArrayList<Transfer> getTransfers(JSONObject json) {
         ArrayList<Transfer> result = new ArrayList<Transfer>();
+        System.out.println("getting transfers");
         try {
             JSONArray array = json.getJSONArray("routes");
             JSONObject routes = array.getJSONObject(0);
@@ -121,6 +122,7 @@ public class LocationStuff {
                     result.add(t_object);
                 }
             }
+            System.out.println(result.size() + " transfers");
             return result;
         } catch (Exception e) {
             System.out.println(e.getMessage());

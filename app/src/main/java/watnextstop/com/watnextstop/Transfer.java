@@ -18,7 +18,4 @@ public class Transfer {
         stopNum = n;
         lastLoc = s;
     }
-    public String toString(){
-        return
-    }
 }
