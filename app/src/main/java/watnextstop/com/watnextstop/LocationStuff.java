@@ -1,9 +1,6 @@
 package watnextstop.com.watnextstop;
 
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONObject;
-import org.apache.http.client.methods.HttpPost;
 import org.json.JSONArray;
 import org.apache.http.client.HttpClient;
 import org.apache.http.*;
@@ -91,6 +88,7 @@ public class LocationStuff {
         return (jsonObject);
     }
 
+    /*
     public static int getTransfers(JSONObject json) throws JSONException{
         JSONArray array = json.getJSONArray("routes");
         JSONObject routes = array.getJSONObject(0);
@@ -98,6 +96,37 @@ public class LocationStuff {
         JSONObject legs0 = legs.getJSONObject(0); // the 0 object under legs
         JSONArray steps = legs0.getJSONArray("steps");
         return steps.length(); // size
+    }
+    */
+
+    //updated version
+    public static ArrayList<Transfer> getTransfers(JSONObject json) {
+        ArrayList<Transfer> result = new ArrayList<Transfer>();
+        try {
+            JSONArray array = json.getJSONArray("routes");
+            JSONObject routes = array.getJSONObject(0);
+            JSONArray legs = routes.getJSONArray("legs");
+            JSONObject legs0 = legs.getJSONObject(0); // the 0 object under legs
+            JSONArray steps = legs0.getJSONArray("steps");
+            for (int i = 0; i < steps.length(); i++) {
+                JSONObject t = steps.getJSONObject(i);
+                if (t.has("transit_details")) {
+                    JSONObject details = t.getJSONObject("transit_details");
+                    int numStops = details.getInt("num_stops");
+                    JSONObject arrStop = details.getJSONObject("arrival_stop");
+                    String name = arrStop.getString("name");
+                    double lat = arrStop.getJSONObject("location").getDouble("lat");
+                    double lng = arrStop.getJSONObject("location").getDouble("lng");
+                    Transfer t_object = new Transfer(lat, lng, numStops, name);
+                    result.add(t_object);
+                }
+            }
+            return result;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        } finally {
+            return result;
+        }
     }
 }
 

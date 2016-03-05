@@ -10,6 +10,8 @@ import java.net.HttpURLConnection;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.charset.MalformedInputException;
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.location.Location;
@@ -93,9 +95,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             //get the directions - open new activity, then go back
         System.out.println("Getting directions");
-        System.out.println("# of transfers: " + doDirections());
+        System.out.println("# of transfers: ");
+        for(Transfer t : doDirections()){
+            System.out.println(t.toString());
+        }
     }
-    public int doDirections(){
+    public ArrayList<Transfer> doDirections(){
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
@@ -106,11 +111,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             json = LocationStuff.getDirections(currentLocation.latitude, currentLocation.longitude,
                     destination.getPosition().latitude, destination.getPosition().longitude,key);
             System.out.println("got json");
+
             return LocationStuff.getTransfers(json);
         }
         catch (Exception e) {System.out.println(e.getMessage());}
         finally {
-            return -1;
+            return new ArrayList<Transfer>();
         }
     }
 }
