@@ -10,12 +10,14 @@ import java.util.List;
 public class Transfer {
     public double lat, lgt;
     public int stopNum;
+    public String busHeader;
     public String lastLoc;
 
-    public Transfer(double a, double b, int n, String s) {
+    public Transfer(double a, double b, int n, String s1, String s2) {
         lat = a;
         lgt = b;
         stopNum = n;
-        lastLoc = s;
+        busHeader = s1;
+        lastLoc = s2;
     }
 }

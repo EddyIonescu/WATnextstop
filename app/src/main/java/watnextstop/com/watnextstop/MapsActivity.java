@@ -120,9 +120,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ArrayList<Transfer> transfers = doDirections();
         System.out.println(transfers.size() + " transfers");
         String messagetoshow = "";
-        messagetoshow += "There are " + transfers.size() + " transfers \n";
+        messagetoshow += ((transfers.size() == 1) ? "There is " : "There are ") + transfers.size() + ((transfers.size() == 1) ? " transfer \n" : " transfers \n");
         for(Transfer t : transfers){
-            messagetoshow += t.stopNum + " stops - " + t.lastLoc + "\n";
+            messagetoshow += t.stopNum + " stops; your stop is: " + t.lastLoc + " on the " + t.busHeader + " bus" + "\n";
         }
         new AlertDialog.Builder(this)
                 .setTitle("Your Route")

@@ -43,7 +43,7 @@ import java.util.List;
  */
 
 public class LocationStuff {
-    public static JSONObject getDirections(double lat1, double lng1, double lat2, double lng2, String key) throws MalformedURLException, IOException{
+    public static JSONObject getDirections(double lat1, double lng1, double lat2, double lng2, String key) throws IOException {
         System.out.print(key);
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -116,9 +116,10 @@ public class LocationStuff {
                     int numStops = details.getInt("num_stops");
                     JSONObject arrStop = details.getJSONObject("arrival_stop");
                     String name = arrStop.getString("name");
+                    String bus = details.getString("headsign");
                     double lat = arrStop.getJSONObject("location").getDouble("lat");
                     double lng = arrStop.getJSONObject("location").getDouble("lng");
-                    Transfer t_object = new Transfer(lat, lng, numStops, name);
+                    Transfer t_object = new Transfer(lat, lng, numStops, bus, name);
                     result.add(t_object);
                 }
             }
